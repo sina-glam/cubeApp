@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CubeApp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        #cube-container {
+            perspective: 800px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        #cube {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            transform-style: preserve-3d;
+            transform: rotateX(-30deg) rotateY(45deg);
+            cursor: grab;
+        }
+
+        .face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.8;
+        }
+
+        .color-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .color-input-wrapper {
+            border: 1px solid lightgray;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center">
+        <h1 class="mb-4">CubeApp</h1>
+        <div class="mb-3">
+            <label for="edge-length" class="form-label">Edge Length (1-10 cm):</label>
+            <input type="number" id="edge-length" name="edge-length" min="1" max="10" value="5" class="form-control w-25 mx-auto">
+        </div>
+        <div class="color-inputs mb-3">
+            <div class="color-input-wrapper text-center">
+                <label for="s1" class="form-label">Side 1 Color:</label>
+                <input type="color" id="s1" name="s1" value="#ff0000" class="form-control form-control-color mx-auto">
+            </div>
+            <div class="color-input-wrapper text-center">
+                <label for="s2" class="form-label">Side 2 Color:</label>
+                <input type="color" id="s2" name="s2" value="#00ff00" class="form-control form-control-color mx-auto">
+            </div>
+            <div class="color-input-wrapper text-center">
+                <label for="s3" class="form-label">Side 3 Color:</label>
+                <input type="color" id="s3" name="s3" value="#0000ff" class="form-control form-control-color mx-auto">
+            </div>
+            <div class="color-input-wrapper text-center">
+                <label for="s4" class="form-label">Side 4 Color:</label>
+                <input type="color" id="s4" name="s4" value="#ffff00" class="form-control form-control-color mx-auto">
+            </div>
+            <div class="color-input-wrapper text-center">
+                <label for="s5" class="form-label">Side 5 Color:</label>
+                <input type="color" id="s5" name="s5" value="#ff00ff" class="form-control form-control-color mx-auto">
+            </div>
+            <div class="color-input-wrapper text-center">
+                <label for="s6" class="form-label">Side 6 Color:</label>
+                <input type="color" id="s6" name="s6" value="#00ffff" class="form-control form-control-color mx-auto">
+            </div>
+        </div>
+        <button onclick="createCube()" class="btn btn-primary mb-4">Create Cube</button>
+        <div id="cube-container"></div>
+    </div>
+
+    <script>
+        let isDragging = false;
+        let previousMouseX, previousMouseY;
+        let rotationX = -30;
+        let rotationY = 45;
+
+        function createCube() {
+            const edgeLength = document.getElementById('edge-length').value * 20; // Convert cm to pixels, doubled
+            const colors = [
+                document.getElementById('s1').value,
+                document.getElementById('s2').value,
+                document.getElementById('s3').value,
+                document.getElementById('s4').value,
+                document.getElementById('s5').value,
+                document.getElementById('s6').value
+            ];
+
+            const cubeContainer = document.getElementById('cube-container');
+            cubeContainer.innerHTML = '';
+
+            const cube = document.createElement('div');
+            cube.id = 'cube';
+            cube.style.width = `${edgeLength}px`;
+            cube.style.height = `${edgeLength}px`;
+            cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+
+            const faces = ['front', 'back', 'right', 'left', 'top', 'bottom'];
+            const transforms = [
+                `translateZ(${edgeLength / 2}px)`,
+                `rotateY(180deg) translateZ(${edgeLength / 2}px)`,
+                `rotateY(90deg) translateZ(${edgeLength / 2}px)`,
+                `rotateY(-90deg) translateZ(${edgeLength / 2}px)`,
+                `rotateX(90deg) translateZ(${edgeLength / 2}px)`,
+                `rotateX(-90deg) translateZ(${edgeLength / 2}px)`
+            ];
+
+            faces.forEach((face, index) => {
+                const faceDiv = document.createElement('div');
+                faceDiv.classList.add('face');
+                faceDiv.style.background = colors[index];
+                faceDiv.style.transform = transforms[index];
+                cube.appendChild(faceDiv);
+            });
+
+            cubeContainer.appendChild(cube);
+
+            cube.addEventListener('mousedown', (event) => {
+                isDragging = true;
+                previousMouseX = event.clientX;
+                previousMouseY = event.clientY;
+                cube.style.cursor = 'grabbing';
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                cube.style.cursor = 'grab';
+            });
+
+            document.addEventListener('mousemove', (event) => {
+                if (isDragging) {
+                    const deltaX = event.clientX - previousMouseX;
+                    const deltaY = event.clientY - previousMouseY;
+                    rotationY += deltaX * 0.5;
+                    rotationX -= deltaY * 0.5;
+                    cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+                    previousMouseX = event.clientX;
+                    previousMouseY = event.clientY;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
